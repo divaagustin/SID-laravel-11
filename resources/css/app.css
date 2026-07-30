@@ -1,0 +1,9 @@
+@import "tailwindcss";
+
+@theme {
+    --color-hijau: #1a5c2d;
+    --color-hijau-tua: #0f3d1e;
+    --color-emas: #e8a020;
+    --color-emas-muda: #f5c842;
+    --color-krem: #fdf6e3;
+}
