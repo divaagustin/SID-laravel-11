@@ -39,6 +39,20 @@ class PermohonanSuratForm
                         TextInput::make('alasan')
                             ->label('Catatan Alasan Penolakan / Revisi')
                             ->placeholder('Isi jika permohonan ditolak'),
+
+                        Select::make('id_pamong')
+                            ->label('Pamong Penandatangan Surat')
+                            ->options(function () {
+                                return \App\Models\AparaturDesa::with('jabatan')
+                                    ->where('pamong_status', 1)
+                                    ->get()
+                                    ->mapWithKeys(function ($p) {
+                                        $j = $p->jabatan->nama ?? 'Pamong Desa';
+                                        return [$p->pamong_id => "{$p->pamong_nama} ({$j})"];
+                                    });
+                            })
+                            ->searchable()
+                            ->placeholder('Pilih Pamong Penandatangan (Default: Kepala Desa)'),
                     ]),
 
                     Textarea::make('keterangan')

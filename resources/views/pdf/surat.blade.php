@@ -182,10 +182,48 @@
     </div>
 
     {{-- TANDA TANGAN & TTE QR CODE CONTAINER --}}
+    @php
+        $penandatangan = null;
+
+        if (! empty($log->id_pamong)) {
+            $penandatangan = \App\Models\AparaturDesa::with('jabatan')->find($log->id_pamong);
+        } elseif (! empty($log->pamong_id)) {
+            $penandatangan = \App\Models\AparaturDesa::with('jabatan')->find($log->pamong_id);
+        }
+
+        if (! $penandatangan) {
+            $penandatangan = \App\Models\AparaturDesa::with('jabatan')
+                ->where('pamong_status', 1)
+                ->where(function ($q) {
+                    $q->where('jabatan_id', 1)
+                      ->orWhereHas('jabatan', fn ($j) => $j->where('nama', 'like', '%Kepala Desa%'));
+                })->first();
+        }
+
+        if (! $penandatangan) {
+            $penandatangan = \App\Models\AparaturDesa::with('jabatan')
+                ->where('pamong_status', 1)
+                ->where(function ($q) {
+                    $q->where('jabatan_id', 2)
+                      ->orWhereHas('jabatan', fn ($j) => $j->where('nama', 'like', '%Sekretaris%'));
+                })->first();
+        }
+
+        if (! $penandatangan) {
+            $penandatangan = \App\Models\AparaturDesa::with('jabatan')
+                ->where('pamong_status', 1)
+                ->first();
+        }
+
+        $namaJabatan = $penandatangan->jabatan->nama ?? 'Kepala Desa';
+        $namaPenandatangan = $penandatangan->pamong_nama ?? ($config->nama_kepala_desa ?? 'KEPALA DESA');
+        $nipPenandatangan = $penandatangan->pamong_nip ?? ($config->nip_kepala_desa ?? null);
+    @endphp
+
     <div class="signature-table">
         <div class="signature-box">
-            <p>{{ $config->nama_desa ?? 'Serdang' }}, {{ \Carbon\Carbon::parse($log->created_at ?? now())->format('d F Y') }}<br>
-            <strong>Kepala Desa {{ $config->nama_desa ?? 'Serdang' }}</strong></p>
+            <p>{{ $config->nama_desa ?? 'Serdang' }}, {{ \Carbon\Carbon::parse($log->created_at ?? now())->translatedFormat('d F Y') }}<br>
+            <strong>{{ $namaJabatan }} {{ $config->nama_desa ?? 'Serdang' }}</strong></p>
 
             @if(isset($log->is_tte) && $log->is_tte)
                 {{-- TTE QR Code Stamp Container --}}
@@ -200,9 +238,9 @@
             @endif
 
             <p style="margin-top: 5px;">
-                <strong><u>{{ strtoupper($config->nama_kepala_desa ?? 'BUDI SANTOSO') }}</u></strong><br>
-                @if(isset($config->nip_kepala_desa) && $config->nip_kepala_desa)
-                    NIP. {{ $config->nip_kepala_desa }}
+                <strong><u>{{ strtoupper($namaPenandatangan) }}</u></strong><br>
+                @if($nipPenandatangan)
+                    NIP. {{ $nipPenandatangan }}
                 @endif
             </p>
         </div>
