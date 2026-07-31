@@ -306,15 +306,29 @@ class LaporanBulananPage extends Page
             $lahirL = DB::table('tweb_penduduk')
                 ->whereIn('id_cluster', $clusterIds)
                 ->where('sex', 1)
-                ->whereMonth('tgl_daftar', $this->bulan)
-                ->whereYear('tgl_daftar', $this->tahun)
+                ->where(function ($q) {
+                    $q->where(function ($q) {
+                        $q->whereMonth('tgl_daftar', $this->bulan)
+                          ->whereYear('tgl_daftar', $this->tahun);
+                    })->orWhere(function ($q) {
+                        $q->whereMonth('created_at', $this->bulan)
+                          ->whereYear('created_at', $this->tahun);
+                    });
+                })
                 ->count();
 
             $lahirP = DB::table('tweb_penduduk')
                 ->whereIn('id_cluster', $clusterIds)
                 ->where('sex', 2)
-                ->whereMonth('tgl_daftar', $this->bulan)
-                ->whereYear('tgl_daftar', $this->tahun)
+                ->where(function ($q) {
+                    $q->where(function ($q) {
+                        $q->whereMonth('tgl_daftar', $this->bulan)
+                          ->whereYear('tgl_daftar', $this->tahun);
+                    })->orWhere(function ($q) {
+                        $q->whereMonth('created_at', $this->bulan)
+                          ->whereYear('created_at', $this->tahun);
+                    });
+                })
                 ->count();
 
             $matiL = DB::table('tweb_penduduk')
@@ -337,16 +351,30 @@ class LaporanBulananPage extends Page
                 ->whereIn('id_cluster', $clusterIds)
                 ->where('sex', 1)
                 ->where('status', 2)
-                ->whereMonth('tgl_daftar', $this->bulan)
-                ->whereYear('tgl_daftar', $this->tahun)
+                ->where(function ($q) {
+                    $q->where(function ($q) {
+                        $q->whereMonth('tgl_daftar', $this->bulan)
+                          ->whereYear('tgl_daftar', $this->tahun);
+                    })->orWhere(function ($q) {
+                        $q->whereMonth('created_at', $this->bulan)
+                          ->whereYear('created_at', $this->tahun);
+                    });
+                })
                 ->count();
 
             $datangP = DB::table('tweb_penduduk')
                 ->whereIn('id_cluster', $clusterIds)
                 ->where('sex', 2)
                 ->where('status', 2)
-                ->whereMonth('tgl_daftar', $this->bulan)
-                ->whereYear('tgl_daftar', $this->tahun)
+                ->where(function ($q) {
+                    $q->where(function ($q) {
+                        $q->whereMonth('tgl_daftar', $this->bulan)
+                          ->whereYear('tgl_daftar', $this->tahun);
+                    })->orWhere(function ($q) {
+                        $q->whereMonth('created_at', $this->bulan)
+                          ->whereYear('created_at', $this->tahun);
+                    });
+                })
                 ->count();
 
             $pindahL = DB::table('tweb_penduduk')
