@@ -1,26 +1,18 @@
 <?php
 
-namespace App\Console\Commands;
-
-use Illuminate\Console\Command;
+use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
-class FixAutoIncrementCommand extends Command
+return new class extends Migration
 {
-    protected $signature = 'db:fix-autoincrement';
-    protected $description = 'Perbaiki seluruh tabel MySQL yang kehilangan AUTO_INCREMENT pada Primary Key (id, pamong_id, dll)';
-
-    public function handle()
+    public function up(): void
     {
-        $this->info('Memulai perbaikan AUTO_INCREMENT pada seluruh tabel & primary key database...');
-
         DB::statement('SET FOREIGN_KEY_CHECKS=0;');
 
         $dbName = DB::getDatabaseName();
         $tables = DB::select('SHOW TABLES');
         $key = 'Tables_in_' . $dbName;
-        $count = 0;
 
         foreach ($tables as $table) {
             if (! isset($table->{$key})) {
@@ -29,7 +21,6 @@ class FixAutoIncrementCommand extends Command
 
             $tableName = $table->{$key};
 
-            // Cari kolom Primary Key sebenarnya (bisa 'id', 'pamong_id', dll)
             $pkCol = null;
             $primaryKeys = DB::select("SHOW KEYS FROM `{$tableName}` WHERE Key_name = 'PRIMARY'");
             
@@ -45,7 +36,6 @@ class FixAutoIncrementCommand extends Command
                 continue;
             }
 
-            // Fix jika ada baris dengan Primary Key = 0
             try {
                 $hasZero = DB::table($tableName)->where($pkCol, 0)->exists();
                 if ($hasZero) {
@@ -55,7 +45,6 @@ class FixAutoIncrementCommand extends Command
                 }
             } catch (\Throwable $e) {}
 
-            // Inspeksi atribut AUTO_INCREMENT pada kolom primary key
             $columnInfo = DB::select("SHOW COLUMNS FROM `{$tableName}` LIKE '{$pkCol}'");
             if (empty($columnInfo)) {
                 continue;
@@ -93,15 +82,14 @@ class FixAutoIncrementCommand extends Command
                 try {
                     DB::statement("ALTER TABLE `{$tableName}` AUTO_INCREMENT = {$nextId}");
                 } catch (\Throwable $e) {}
-
-                $this->info("✓ Tabel [{$tableName}] kolom [{$pkCol}] berhasil diset AUTO_INCREMENT!");
-                $count++;
             }
         }
 
         DB::statement('SET FOREIGN_KEY_CHECKS=1;');
-
-        $this->info("SELESAI! Sebanyak {$count} tabel & primary key berhasil diperbaiki.");
-        return 0;
     }
-}
+
+    public function down(): void
+    {
+        // No down needed
+    }
+};
