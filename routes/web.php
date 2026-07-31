@@ -93,6 +93,22 @@ Route::middleware(['auth'])->group(function () {
         return $pdf->stream("Laporan_Bulanan_Demografi_{$data['bulan_nama']}_{$tahun}.pdf");
     })->name('admin.laporan-bulanan.pdf');
 
+    Route::get('/admin/laporan-mutasi-dusun/pdf', function (\Illuminate\Http\Request $request) {
+        $bulan = (int) $request->get('bulan', date('m'));
+        $tahun = (int) $request->get('tahun', date('Y'));
+
+        $page = new \App\Filament\Pages\LaporanBulananPage();
+        $page->bulan = $bulan;
+        $page->tahun = $tahun;
+
+        $data = $page->getReportDataProperty();
+
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('pdf.laporan_mutasi_dusun', compact('data'))
+            ->setPaper('a4', 'landscape');
+
+        return $pdf->stream("Laporan_Mutasi_Dusun_{$data['bulan_nama']}_{$tahun}.pdf");
+    })->name('admin.laporan-mutasi-dusun.pdf');
+
     Route::get('/admin/laporan-bulanan/excel', function (\Illuminate\Http\Request $request) {
         $bulan = (int) $request->get('bulan', date('m'));
         $tahun = (int) $request->get('tahun', date('Y'));

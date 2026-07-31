@@ -80,12 +80,17 @@
             </div>
 
             <div class="flex items-center gap-2">
+                <a href="{{ route('admin.laporan-mutasi-dusun.pdf', ['bulan' => $bulan, 'tahun' => $tahun]) }}" target="_blank" class="inline-flex items-center gap-2 px-4 py-2 bg-blue-700 hover:bg-blue-800 text-white text-xs font-semibold rounded-lg shadow transition duration-150">
+                    <x-heroicon-o-printer style="width: 16px; height: 16px;" />
+                    Cetak Tabel Per Dusun (PDF)
+                </a>
+
                 <a href="{{ route('admin.laporan-bulanan.excel', ['bulan' => $bulan, 'tahun' => $tahun]) }}" target="_blank" class="inline-flex items-center gap-2 px-4 py-2 bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-semibold rounded-lg shadow transition duration-150">
                     <x-heroicon-o-document-text style="width: 16px; height: 16px;" />
                     Ekspor Excel / CSV
                 </a>
 
-                <a href="{{ route('admin.laporan-bulanan.pdf', ['bulan' => $bulan, 'tahun' => $tahun]) }}" target="_blank" class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-lg shadow transition duration-150">
+                <a href="{{ route('admin.laporan-bulanan.pdf', ['bulan' => $bulan, 'tahun' => $tahun]) }}" target="_blank" class="inline-flex items-center gap-2 px-4 py-2 bg-gray-800 hover:bg-gray-900 text-white text-xs font-semibold rounded-lg shadow transition duration-150">
                     <x-heroicon-o-printer style="width: 16px; height: 16px;" />
                     Cetak PDF Lampiran IV
                 </a>
@@ -177,7 +182,100 @@
         </div>
     </div>
 
-    {{-- TABEL 2: DATA PENDUDUK BERDASARKAN RENTANG USIA --}}
+    {{-- TABEL 2: REKAPITULASI MUTASI PENDUDUK PER DUSUN (FORMAT RESMI FOTO EXCEL) --}}
+    <div class="report-card bg-white dark:bg-gray-900">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
+            <h3 class="report-card-title text-gray-900 dark:text-white mb-0">
+                <span class="w-2.5 h-2.5 rounded-full bg-blue-500 inline-block"></span>
+                2. Rekapitulasi Mutasi Penduduk Per Dusun (Format Resmi Kecamatan/Desa)
+            </h3>
+            <a href="{{ route('admin.laporan-mutasi-dusun.pdf', ['bulan' => $bulan, 'tahun' => $tahun]) }}" target="_blank" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-lg shadow transition">
+                <x-heroicon-o-printer style="width: 14px; height: 14px;" />
+                Cetak Tabel Per Dusun (PDF)
+            </a>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="report-table">
+                <thead>
+                    <tr class="bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white font-bold">
+                        <th rowspan="2" style="width: 35px;">NO</th>
+                        <th rowspan="2" style="text-align: left; min-width: 120px;">DUSUN</th>
+                        <th colspan="3">PENDUDUK AWAL BULAN INI</th>
+                        <th colspan="3">LAHIR BULAN INI</th>
+                        <th colspan="3">MATI BULAN INI</th>
+                        <th colspan="3">PENDATANG BULAN INI</th>
+                        <th colspan="3">PINDAH BULAN INI</th>
+                        <th colspan="3">PENDUDUK AKHIR</th>
+                        <th rowspan="2" style="width: 75px;">JUMLAH KK</th>
+                    </tr>
+                    <tr class="bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white font-bold">
+                        <th>LK</th><th>PR</th><th class="bg-gray-200 dark:bg-gray-700">LK+PR</th>
+                        <th>LK</th><th>PR</th><th class="bg-gray-200 dark:bg-gray-700">LK+PR</th>
+                        <th>LK</th><th>PR</th><th class="bg-gray-200 dark:bg-gray-700">LK+PR</th>
+                        <th>LK</th><th>PR</th><th class="bg-gray-200 dark:bg-gray-700">LK+PR</th>
+                        <th>LK</th><th>PR</th><th class="bg-gray-200 dark:bg-gray-700">LK+PR</th>
+                        <th>LK</th><th>PR</th><th class="bg-gray-200 dark:bg-gray-700">LK+PR</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse($data['dusun_mutasi_rows'] as $r)
+                        <tr class="hover:bg-gray-50 dark:hover:bg-gray-800">
+                            <td>{{ $r['no'] }}</td>
+                            <td style="text-align: left; font-weight: 600;">{{ $r['dusun'] }}</td>
+                            <td>{{ $r['awal_l'] }}</td>
+                            <td>{{ $r['awal_p'] }}</td>
+                            <td class="bg-gray-100 dark:bg-gray-800 font-bold">{{ $r['awal_total'] }}</td>
+                            <td>{{ $r['lahir_l'] }}</td>
+                            <td>{{ $r['lahir_p'] }}</td>
+                            <td class="bg-gray-100 dark:bg-gray-800 font-bold">{{ $r['lahir_total'] }}</td>
+                            <td>{{ $r['mati_l'] }}</td>
+                            <td>{{ $r['mati_p'] }}</td>
+                            <td class="bg-gray-100 dark:bg-gray-800 font-bold">{{ $r['mati_total'] }}</td>
+                            <td>{{ $r['datang_l'] }}</td>
+                            <td>{{ $r['datang_p'] }}</td>
+                            <td class="bg-gray-100 dark:bg-gray-800 font-bold">{{ $r['datang_total'] }}</td>
+                            <td>{{ $r['pindah_l'] }}</td>
+                            <td>{{ $r['pindah_p'] }}</td>
+                            <td class="bg-gray-100 dark:bg-gray-800 font-bold">{{ $r['pindah_total'] }}</td>
+                            <td>{{ $r['akhir_l'] }}</td>
+                            <td>{{ $r['akhir_p'] }}</td>
+                            <td class="bg-gray-100 dark:bg-gray-800 font-bold">{{ $r['akhir_total'] }}</td>
+                            <td class="font-semibold">{{ number_format($r['jumlah_kk'], 0, ',', '.') }}</td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="20" class="text-gray-500 py-4">Belum ada data wilayah dusun.</td>
+                        </tr>
+                    @endforelse
+                </tbody>
+                <tfoot>
+                    <tr class="bg-gray-200 dark:bg-gray-700 font-bold text-gray-900 dark:text-white">
+                        <td colspan="2" style="text-align: center;">JUMLAH</td>
+                        <td>{{ number_format($data['dusun_mutasi_totals']['awal_l'], 0, ',', '.') }}</td>
+                        <td>{{ number_format($data['dusun_mutasi_totals']['awal_p'], 0, ',', '.') }}</td>
+                        <td>{{ number_format($data['dusun_mutasi_totals']['awal_total'], 0, ',', '.') }}</td>
+                        <td>{{ number_format($data['dusun_mutasi_totals']['lahir_l'], 0, ',', '.') }}</td>
+                        <td>{{ number_format($data['dusun_mutasi_totals']['lahir_p'], 0, ',', '.') }}</td>
+                        <td>{{ number_format($data['dusun_mutasi_totals']['lahir_total'], 0, ',', '.') }}</td>
+                        <td>{{ number_format($data['dusun_mutasi_totals']['mati_l'], 0, ',', '.') }}</td>
+                        <td>{{ number_format($data['dusun_mutasi_totals']['mati_p'], 0, ',', '.') }}</td>
+                        <td>{{ number_format($data['dusun_mutasi_totals']['mati_total'], 0, ',', '.') }}</td>
+                        <td>{{ number_format($data['dusun_mutasi_totals']['datang_l'], 0, ',', '.') }}</td>
+                        <td>{{ number_format($data['dusun_mutasi_totals']['datang_p'], 0, ',', '.') }}</td>
+                        <td>{{ number_format($data['dusun_mutasi_totals']['datang_total'], 0, ',', '.') }}</td>
+                        <td>{{ number_format($data['dusun_mutasi_totals']['pindah_l'], 0, ',', '.') }}</td>
+                        <td>{{ number_format($data['dusun_mutasi_totals']['pindah_p'], 0, ',', '.') }}</td>
+                        <td>{{ number_format($data['dusun_mutasi_totals']['pindah_total'], 0, ',', '.') }}</td>
+                        <td>{{ number_format($data['dusun_mutasi_totals']['akhir_l'], 0, ',', '.') }}</td>
+                        <td>{{ number_format($data['dusun_mutasi_totals']['akhir_p'], 0, ',', '.') }}</td>
+                        <td>{{ number_format($data['dusun_mutasi_totals']['akhir_total'], 0, ',', '.') }}</td>
+                        <td>{{ number_format($data['dusun_mutasi_totals']['jumlah_kk'], 0, ',', '.') }}</td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
     <div class="report-card bg-white dark:bg-gray-900">
         <h3 class="report-card-title text-gray-900 dark:text-white">
             <span class="w-2.5 h-2.5 rounded-full bg-blue-500 inline-block"></span>

@@ -288,6 +288,135 @@ class LaporanBulananPage extends Page
             9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember'
         ];
 
+        // 8. Rekapitulasi Mutasi Penduduk Per Dusun (Format Tabel Gambar)
+        $dusunMutasiRows = [];
+        $totAwalL = 0; $totAwalP = 0;
+        $totLahirL = 0; $totLahirP = 0;
+        $totMatiL = 0; $totMatiP = 0;
+        $totDatangL = 0; $totDatangP = 0;
+        $totPindahL = 0; $totPindahP = 0;
+        $totAkhirL = 0; $totAkhirP = 0;
+        $totKk = 0;
+
+        foreach ($dusunList as $idx => $dusunName) {
+            $clusterIds = DB::table('tweb_wil_clusterdesa')
+                ->where('dusun', $dusunName)
+                ->pluck('id');
+
+            $lahirL = DB::table('tweb_penduduk')
+                ->whereIn('id_cluster', $clusterIds)
+                ->where('sex', 1)
+                ->whereMonth('tgl_daftar', $this->bulan)
+                ->whereYear('tgl_daftar', $this->tahun)
+                ->count();
+
+            $lahirP = DB::table('tweb_penduduk')
+                ->whereIn('id_cluster', $clusterIds)
+                ->where('sex', 2)
+                ->whereMonth('tgl_daftar', $this->bulan)
+                ->whereYear('tgl_daftar', $this->tahun)
+                ->count();
+
+            $matiL = DB::table('tweb_penduduk')
+                ->whereIn('id_cluster', $clusterIds)
+                ->where('sex', 1)
+                ->where('status_dasar', 2)
+                ->whereMonth('created_at', $this->bulan)
+                ->whereYear('created_at', $this->tahun)
+                ->count();
+
+            $matiP = DB::table('tweb_penduduk')
+                ->whereIn('id_cluster', $clusterIds)
+                ->where('sex', 2)
+                ->where('status_dasar', 2)
+                ->whereMonth('created_at', $this->bulan)
+                ->whereYear('created_at', $this->tahun)
+                ->count();
+
+            $datangL = DB::table('tweb_penduduk')
+                ->whereIn('id_cluster', $clusterIds)
+                ->where('sex', 1)
+                ->where('status', 2)
+                ->whereMonth('tgl_daftar', $this->bulan)
+                ->whereYear('tgl_daftar', $this->tahun)
+                ->count();
+
+            $datangP = DB::table('tweb_penduduk')
+                ->whereIn('id_cluster', $clusterIds)
+                ->where('sex', 2)
+                ->where('status', 2)
+                ->whereMonth('tgl_daftar', $this->bulan)
+                ->whereYear('tgl_daftar', $this->tahun)
+                ->count();
+
+            $pindahL = DB::table('tweb_penduduk')
+                ->whereIn('id_cluster', $clusterIds)
+                ->where('sex', 1)
+                ->where('status_dasar', 3)
+                ->whereMonth('created_at', $this->bulan)
+                ->whereYear('created_at', $this->tahun)
+                ->count();
+
+            $pindahP = DB::table('tweb_penduduk')
+                ->whereIn('id_cluster', $clusterIds)
+                ->where('sex', 2)
+                ->where('status_dasar', 3)
+                ->whereMonth('created_at', $this->bulan)
+                ->whereYear('created_at', $this->tahun)
+                ->count();
+
+            $akhirL = DB::table('tweb_penduduk')
+                ->whereIn('id_cluster', $clusterIds)
+                ->where('status_dasar', 1)
+                ->where('sex', 1)
+                ->count();
+
+            $akhirP = DB::table('tweb_penduduk')
+                ->whereIn('id_cluster', $clusterIds)
+                ->where('status_dasar', 1)
+                ->where('sex', 2)
+                ->count();
+
+            $awalL = max(0, $akhirL - ($lahirL + $datangL) + ($matiL + $pindahL));
+            $awalP = max(0, $akhirP - ($lahirP + $datangP) + ($matiP + $pindahP));
+
+            $jumlahKk = DB::table('tweb_keluarga')
+                ->whereIn('id_cluster', $clusterIds)
+                ->count();
+
+            $totAwalL += $awalL; $totAwalP += $awalP;
+            $totLahirL += $lahirL; $totLahirP += $lahirP;
+            $totMatiL += $matiL; $totMatiP += $matiP;
+            $totDatangL += $datangL; $totDatangP += $datangP;
+            $totPindahL += $pindahL; $totPindahP += $pindahP;
+            $totAkhirL += $akhirL; $totAkhirP += $akhirP;
+            $totKk += $jumlahKk;
+
+            $dusunMutasiRows[] = [
+                'no' => $idx + 1,
+                'dusun' => $dusunName,
+                'awal_l' => $awalL,
+                'awal_p' => $awalP,
+                'awal_total' => $awalL + $awalP,
+                'lahir_l' => $lahirL,
+                'lahir_p' => $lahirP,
+                'lahir_total' => $lahirL + $lahirP,
+                'mati_l' => $matiL,
+                'mati_p' => $matiP,
+                'mati_total' => $matiL + $matiP,
+                'datang_l' => $datangL,
+                'datang_p' => $datangP,
+                'datang_total' => $datangL + $datangP,
+                'pindah_l' => $pindahL,
+                'pindah_p' => $pindahP,
+                'pindah_total' => $pindahL + $pindahP,
+                'akhir_l' => $akhirL,
+                'akhir_p' => $akhirP,
+                'akhir_total' => $akhirL + $akhirP,
+                'jumlah_kk' => $jumlahKk,
+            ];
+        }
+
         return [
             'config' => $config,
             'bulan_nama' => $namaBulan[$this->bulan] ?? 'Januari',
@@ -306,6 +435,28 @@ class LaporanBulananPage extends Page
                 'all_l' => $grandAllL,
                 'all_p' => $grandAllP,
                 'all_total' => $grandAllTotal,
+            ],
+            'dusun_mutasi_rows' => $dusunMutasiRows,
+            'dusun_mutasi_totals' => [
+                'awal_l' => $totAwalL,
+                'awal_p' => $totAwalP,
+                'awal_total' => $totAwalL + $totAwalP,
+                'lahir_l' => $totLahirL,
+                'lahir_p' => $totLahirP,
+                'lahir_total' => $totLahirL + $totLahirP,
+                'mati_l' => $totMatiL,
+                'mati_p' => $totMatiP,
+                'mati_total' => $totMatiL + $totMatiP,
+                'datang_l' => $totDatangL,
+                'datang_p' => $totDatangP,
+                'datang_total' => $totDatangL + $totDatangP,
+                'pindah_l' => $totPindahL,
+                'pindah_p' => $totPindahP,
+                'pindah_total' => $totPindahL + $totPindahP,
+                'akhir_l' => $totAkhirL,
+                'akhir_p' => $totAkhirP,
+                'akhir_total' => $totAkhirL + $totAkhirP,
+                'jumlah_kk' => $totKk,
             ],
             'age_ranges' => $ageRangesData,
             'agama_data' => $agamaData,
